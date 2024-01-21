@@ -4,11 +4,12 @@ import axios from 'axios';
 function App() {
     const [clients, setClients] = useState([]);
     const [newClient, setNewClient] = useState({ name: '', email: '', phone: '' });
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Function to fetch clients from the backend
+    // Function to fetch clients from the backend with optional search
     const fetchClients = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/clients');
+            const response = await axios.get(`http://localhost:3001/clients?search=${searchTerm}`);
             setClients(response.data);
         } catch (error) {
             console.error('Error fetching clients:', error);
@@ -18,6 +19,11 @@ function App() {
     // Function to handle form input changes
     const handleInputChange = (e) => {
         setNewClient({ ...newClient, [e.target.name]: e.target.value });
+    };
+
+    // Function to handle search input changes
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
     };
 
     // Function to submit new client
@@ -68,6 +74,16 @@ function App() {
                     />
                     <button type="submit">Add Client</button>
                 </form>
+            </div>
+
+            <div className="client-search">
+                <input
+                    type="text"
+                    placeholder="Search Clients"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                />
+                <button onClick={fetchClients}>Search</button>
             </div>
 
             <div className="client-list">
