@@ -17,3 +17,5 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: postgres
       POSTGRES_SSL: off
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
