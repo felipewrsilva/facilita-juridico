@@ -1,0 +1,16 @@
+{
+  "name": "facilita-juridico",
+  "version": "1.0.0",
+  "description": "Teste de Programação Desenvolvedor Facilita Jurídico",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Felipe Silva",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/felipewrsilva/facilita-juridico"
+  }
+}
