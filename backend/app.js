@@ -31,8 +31,18 @@ app.get('/', (req, res) => {
 // Client routes
 app.get('/clients', async (req, res) => {
     try {
-        const clientList = await pool.query('SELECT * FROM clients');
-        res.json(clientList.rows);
+        const { search } = req.query;
+        let query = 'SELECT * FROM clients';
+
+        if (search) {
+            query += ` WHERE name LIKE $1 OR email LIKE $1 OR phone LIKE $1`;
+            const values = [`%${search}%`];
+            const clientList = await pool.query(query, values);
+            res.json(clientList.rows);
+        } else {
+            const clientList = await pool.query(query);
+            res.json(clientList.rows);
+        }
     } catch (err) {
         res.status(500).send(err.message);
     }
