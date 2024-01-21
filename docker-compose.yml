@@ -10,6 +10,14 @@ services:
       - NODE_ENV=production
     depends_on:
       - database
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
   database:
     image: postgres:latest
     environment:
