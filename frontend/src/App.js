@@ -1,20 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 function App() {
     const [clients, setClients] = useState([]);
-    const [newClient, setNewClient] = useState({ name: '', email: '', phone: '' });
+    const [newClient, setNewClient] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        x_coordinate: '',
+        y_coordinate: ''
+    });
     const [searchTerm, setSearchTerm] = useState('');
+    const [optimizedRoute, setOptimizedRoute] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Function to fetch the optimized route from the backend
+    const fetchOptimizedRoute = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/optimize-route');
+            console.log(response.data.route);
+            setOptimizedRoute(response.data.route);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching optimized route:', error);
+        }
+    };
+
+    // Function to close the modal
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
 
     // Function to fetch clients from the backend with optional search
-    const fetchClients = async () => {
+    const fetchClients = useCallback(async () => {
         try {
             const response = await axios.get(`http://localhost:3001/clients?search=${searchTerm}`);
             setClients(response.data);
         } catch (error) {
             console.error('Error fetching clients:', error);
         }
-    };
+    }, [searchTerm]);
+
+    useEffect(() => {
+        fetchClients();
+    }, [fetchClients]);
 
     // Function to handle form input changes
     const handleInputChange = (e) => {
@@ -30,18 +59,24 @@ function App() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3001/clients', newClient);
+            // Make sure to send x_coordinate and y_coordinate as numbers
+            const coordinates = {
+                x_coordinate: parseFloat(newClient.x_coordinate) || 0,
+                y_coordinate: parseFloat(newClient.y_coordinate) || 0
+            };
+            await axios.post('http://localhost:3001/clients', { ...newClient, ...coordinates });
             fetchClients(); // Refresh the client list
-            setNewClient({ name: '', email: '', phone: '' }); // Reset form
+            setNewClient({
+                name: '',
+                email: '',
+                phone: '',
+                x_coordinate: '',
+                y_coordinate: ''
+            });
         } catch (error) {
             console.error('Error adding client:', error);
         }
     };
-
-    // Fetch clients on component mount
-    useEffect(() => {
-        fetchClients();
-    }, []);
 
     return (
         <div className="App">
@@ -72,9 +107,41 @@ function App() {
                         value={newClient.phone}
                         onChange={handleInputChange}
                     />
+                    <input
+                        type="text"
+                        name="x_coordinate"
+                        placeholder="X Coordinate"
+                        value={newClient.x_coordinate}
+                        onChange={handleInputChange}
+                    />
+                    <input
+                        type="text"
+                        name="y_coordinate"
+                        placeholder="Y Coordinate"
+                        value={newClient.y_coordinate}
+                        onChange={handleInputChange}
+                    />
                     <button type="submit">Add Client</button>
                 </form>
             </div>
+
+            <div className="optimize-route-button">
+                <button onClick={fetchOptimizedRoute}>Optimize Route</button>
+            </div>
+
+            {isModalOpen && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h2>Optimized Route:</h2>
+                        <ol>
+                            {optimizedRoute.map((client, index) => (
+                                <li key={index}>{client.name}</li>
+                            ))}
+                        </ol>
+                        <button onClick={closeModal}>Close</button>
+                    </div>
+                </div>
+            )}
 
             <div className="client-search">
                 <input
@@ -88,13 +155,28 @@ function App() {
 
             <div className="client-list">
                 <h2>Clients</h2>
-                <ul>
-                    {clients.map(client => (
-                        <li key={client.id}>
-                            {client.name} - {client.email} - {client.phone}
-                        </li>
-                    ))}
-                </ul>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>X Coordinate</th>
+                            <th>Y Coordinate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {clients.map(client => (
+                            <tr key={client.id}>
+                                <td>{client.name}</td>
+                                <td>{client.email}</td>
+                                <td>{client.phone}</td>
+                                <td>{client.x_coordinate}</td>
+                                <td>{client.y_coordinate}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

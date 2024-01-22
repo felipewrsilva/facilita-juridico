@@ -50,10 +50,10 @@ app.get('/clients', async (req, res) => {
 
 app.post('/clients', async (req, res) => {
     try {
-        const { name, email, phone, xCoordinate, yCoordinate } = req.body;
+        const { name, email, phone, x_coordinate, y_coordinate } = req.body;
         const newClient = await pool.query(
             'INSERT INTO clients (name, email, phone, x_coordinate, y_coordinate) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [name, email, phone, xCoordinate, yCoordinate]
+            [name, email, phone, x_coordinate, y_coordinate]
         );
         res.json(newClient.rows[0]);
     } catch (err) {
@@ -65,11 +65,12 @@ app.get('/optimize-route', async (req, res) => {
     try {
         // Retrieve all clients with their coordinates
         const clientsQuery = await pool.query('SELECT * FROM clients');
-        const clients = clientsQuery.rows;
+        let clients = clientsQuery.rows;
 
         // The company's starting point
         let currentLocation = { x: 0, y: 0 };
-        let route = [currentLocation];
+        let route = [{ name: 'Company', x_coordinate: 0, y_coordinate: 0 }]; // Starting with the company
+
         let totalDistance = 0;
 
         while (clients.length > 0) {
@@ -81,7 +82,7 @@ app.get('/optimize-route', async (req, res) => {
 
             if (nearest.client) {
                 // Add nearest client to route and remove from list
-                route.push(nearest.client);
+                route.push({ name: nearest.client.name, x_coordinate: nearest.client.x_coordinate, y_coordinate: nearest.client.y_coordinate });
                 clients = clients.filter(client => client.id !== nearest.client.id);
                 currentLocation = { x: nearest.client.x_coordinate, y: nearest.client.y_coordinate };
                 totalDistance += nearest.distance;
@@ -92,11 +93,12 @@ app.get('/optimize-route', async (req, res) => {
         totalDistance += Math.hypot(currentLocation.x, currentLocation.y);
 
         // Return the visitation order and total distance of the route
-        res.json({ route: route.map(client => client.name || 'Company'), totalDistance });
+        res.json({ route, totalDistance });
     } catch (err) {
         res.status(500).send(err.message);
     }
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 3001;
