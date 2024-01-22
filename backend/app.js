@@ -50,12 +50,49 @@ app.get('/clients', async (req, res) => {
 
 app.post('/clients', async (req, res) => {
     try {
-        const { name, email, phone } = req.body;
+        const { name, email, phone, xCoordinate, yCoordinate } = req.body;
         const newClient = await pool.query(
-            'INSERT INTO clients (name, email, phone) VALUES ($1, $2, $3) RETURNING *',
-            [name, email, phone]
+            'INSERT INTO clients (name, email, phone, x_coordinate, y_coordinate) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [name, email, phone, xCoordinate, yCoordinate]
         );
         res.json(newClient.rows[0]);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+app.get('/optimize-route', async (req, res) => {
+    try {
+        // Retrieve all clients with their coordinates
+        const clientsQuery = await pool.query('SELECT * FROM clients');
+        const clients = clientsQuery.rows;
+
+        // The company's starting point
+        let currentLocation = { x: 0, y: 0 };
+        let route = [currentLocation];
+        let totalDistance = 0;
+
+        while (clients.length > 0) {
+            // Find the nearest client
+            let nearest = clients.reduce((nearest, client) => {
+                let distance = Math.hypot(client.x_coordinate - currentLocation.x, client.y_coordinate - currentLocation.y);
+                return (nearest.distance < distance) ? nearest : { client, distance };
+            }, { client: null, distance: Infinity });
+
+            if (nearest.client) {
+                // Add nearest client to route and remove from list
+                route.push(nearest.client);
+                clients = clients.filter(client => client.id !== nearest.client.id);
+                currentLocation = { x: nearest.client.x_coordinate, y: nearest.client.y_coordinate };
+                totalDistance += nearest.distance;
+            }
+        }
+
+        // Optionally, add the distance back to the company's starting point
+        totalDistance += Math.hypot(currentLocation.x, currentLocation.y);
+
+        // Return the visitation order and total distance of the route
+        res.json({ route: route.map(client => client.name || 'Company'), totalDistance });
     } catch (err) {
         res.status(500).send(err.message);
     }
