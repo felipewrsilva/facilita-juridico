@@ -120,3 +120,108 @@ code {
         width: auto;
     }
 }
+
+.optimize-route-button {
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+.optimize-route-button button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.optimize-route-button button:hover {
+    background-color: #0056b3;
+}
+
+.optimize-route-button button {
+    padding: 10px;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .optimize-route-button {
+        flex-direction: column;
+    }
+}
+
+.client-list {
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 800px;
+    overflow-x: auto;
+}
+
+.client-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.client-list th,
+.client-list td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.client-list th {
+    background-color: #f2f2f2;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    width: auto;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.modal-content button:hover {
+    background-color: #45a049;
+}
+
+.modal-content ol {
+    color: #333;
+}
+
+.modal-content ol li {
+    text-align: center;
+}
